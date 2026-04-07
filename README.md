@@ -11,6 +11,9 @@ Sahayak AI is a desktop productivity assistant built with Python, Tkinter, and O
 - Translator with source and target language selection
 - Professional email drafting helper
 - Prompt creator with category-aware structured responses
+- In-app help center with setup and usage guidance from the `?` button
+- Tooltips across the UI for faster onboarding
+- Collapsible left navigation and collapsible profile details panel
 - Live Ollama status indicator and installed-model selector
 - In-app profile storage for email signatures and personalization
 - Double-click launchers for easier opening
@@ -101,13 +104,17 @@ When the app opens for the first time:
    The button hides automatically after that preferred model is installed
    Download progress and cancel controls appear while the model is being pulled
 
-4. Fill in the left-side profile section if you want email outputs to use your details:
+4. Use the `?` button at the top-right any time you want in-app setup help or feature usage guidance
+
+5. Fill in the left-side profile section if you want email outputs to use your details:
    - Your Full Name
    - Your Email Address
    - Your Phone Number
    - LinkedIn Profile
 
-5. Click `Save Profile`
+6. Click `Save Profile`
+
+You can collapse the menu or the profile detail section whenever you want more working space.
 
 Profile data is stored locally in `user_profile.json`, which is ignored by git and not committed to the repository.
 
@@ -118,6 +125,7 @@ Profile data is stored locally in `user_profile.json`, which is ignored by git a
 - Open `Chat` from the left navigation
 - Type your message
 - Press `Send` or use `Ctrl + Enter`
+- Assistant replies are shown under `Sahayak say:`
 - Use `Stop` to cancel the running request
 
 ### Grammar Fix
@@ -225,3 +233,4 @@ python main.py
 - Responses depend on the selected installed Ollama model
 - Larger models may require more RAM and disk space
 - The preferred experience is with `qwen2.5-coder:14b`, but installed fallback models are also supported
+- The latest UI includes a built-in help center, tooltip hints, and better collapsible workspace controls

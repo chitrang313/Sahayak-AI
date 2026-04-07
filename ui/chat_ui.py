@@ -180,7 +180,7 @@ class ChatUI(AsyncToolFrame):
 
         label_map = {
             "user": ("You", "user_label"),
-            "assistant": ("OSS", "assistant_label"),
+            "assistant": ("Sahayak say:", "assistant_label"),
             "system": ("Status", "system_label"),
         }
         label, tag = label_map[role]
