@@ -313,8 +313,8 @@ class SahayakAIApp:
         self.shell = ttk.Frame(self.root, style="App.TFrame", padding=(20, 0, 20, 0))
         self.shell.grid(row=1, column=0, sticky="nsew")
         self.shell.grid_rowconfigure(0, weight=1)
-        self.shell.grid_columnconfigure(0, weight=0, minsize=280)
-        self.shell.grid_columnconfigure(1, weight=1)
+        self.shell.grid_columnconfigure(0, weight=1, minsize=260, uniform="shell")
+        self.shell.grid_columnconfigure(1, weight=4, uniform="shell")
 
         self.left_panel = tk.Frame(
             self.shell,
@@ -323,7 +323,7 @@ class SahayakAIApp:
             pady=20,
             width=280,
         )
-        self.left_panel.grid(row=0, column=0, sticky="nsw", padx=(0, 20))
+        self.left_panel.grid(row=0, column=0, sticky="nsew")
         self.left_panel.grid_propagate(False)
 
         self.content_area = ttk.Frame(self.shell, style="App.TFrame")
@@ -643,12 +643,14 @@ class SahayakAIApp:
 
         if self.left_panel_visible:
             self.left_panel.grid_remove()
-            self.shell.grid_columnconfigure(0, weight=0, minsize=0)
+            self.shell.grid_columnconfigure(0, weight=0, minsize=0, uniform="")
+            self.shell.grid_columnconfigure(1, weight=1, uniform="")
             self.left_panel_visible = False
             self.menu_button_var.set("Show Menu")
         else:
             self.left_panel.grid()
-            self.shell.grid_columnconfigure(0, weight=0, minsize=280)
+            self.shell.grid_columnconfigure(0, weight=1, minsize=260, uniform="shell")
+            self.shell.grid_columnconfigure(1, weight=4, uniform="shell")
             self.left_panel_visible = True
             self.menu_button_var.set("Hide Menu")
 
