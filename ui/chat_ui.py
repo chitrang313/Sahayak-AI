@@ -16,7 +16,8 @@ class ChatUI(AsyncToolFrame):
     def __init__(self, parent: tk.Misc, controller) -> None:
         super().__init__(parent, controller)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(2, weight=3)
+        self.grid_rowconfigure(4, weight=1)
 
         self.history: list[dict[str, str]] = []
 
@@ -31,6 +32,7 @@ class ChatUI(AsyncToolFrame):
     def _build_ui(self) -> None:
         header = ttk.Label(self, text="Chat", style="Header.TLabel")
         header.grid(row=0, column=0, sticky="w")
+        self.add_tooltip(header, "Open a conversation with your selected local model.")
 
         subtitle = ttk.Label(
             self,
@@ -38,6 +40,10 @@ class ChatUI(AsyncToolFrame):
             style="Body.TLabel",
         )
         subtitle.grid(row=1, column=0, sticky="w", pady=(6, 18))
+        self.add_tooltip(
+            subtitle,
+            "Use this workspace for multi-turn conversations powered by your local Ollama model.",
+        )
 
         self.history_box = ScrolledText(
             self,
@@ -58,10 +64,16 @@ class ChatUI(AsyncToolFrame):
         self.history_box.tag_configure(
             "system_label", foreground="#9f1239", font=("Segoe UI", 10, "bold")
         )
+        self.add_tooltip(
+            self.history_box,
+            "Scrollable chat history for you and Sahayak AI. This area keeps the running conversation context.",
+        )
 
-        ttk.Label(self, text="Your Message", style="FieldLabel.TLabel").grid(
+        input_label = ttk.Label(self, text="Your Message", style="FieldLabel.TLabel")
+        input_label.grid(
             row=3, column=0, sticky="w"
         )
+        self.add_tooltip(input_label, "Type the message you want to send to the model.")
 
         self.input_box = tk.Text(
             self,
@@ -75,16 +87,22 @@ class ChatUI(AsyncToolFrame):
         )
         self.input_box.grid(row=4, column=0, sticky="ew", pady=(8, 6))
         self.input_box.bind("<Control-Return>", self._handle_ctrl_enter)
+        self.add_tooltip(
+            self.input_box,
+            "Enter your message here. Press Ctrl+Enter or click Send to submit it.",
+        )
 
         helper = ttk.Frame(self, style="Panel.TFrame")
         helper.grid(row=5, column=0, sticky="ew")
         helper.grid_columnconfigure(0, weight=1)
 
-        ttk.Label(
+        shortcut_label = ttk.Label(
             helper,
             text="Ctrl+Enter to send",
             style="Body.TLabel",
-        ).grid(row=0, column=0, sticky="w")
+        )
+        shortcut_label.grid(row=0, column=0, sticky="w")
+        self.add_tooltip(shortcut_label, "Keyboard shortcut for sending the current message.")
 
         self.clear_button = ttk.Button(
             helper,
@@ -93,6 +111,7 @@ class ChatUI(AsyncToolFrame):
             command=self._clear_input,
         )
         self.clear_button.grid(row=0, column=1, sticky="e")
+        self.add_tooltip(self.clear_button, "Clear the current chat input without affecting history.")
 
         actions = ttk.Frame(self, style="Panel.TFrame")
         actions.grid(row=6, column=0, sticky="e", pady=(12, 0))
@@ -105,6 +124,7 @@ class ChatUI(AsyncToolFrame):
             command=lambda: self.cancel_request(self._handle_stop),
         )
         self.stop_button.grid(row=0, column=0, padx=(0, 8))
+        self.add_tooltip(self.stop_button, "Stop the active chat response.")
 
         self.send_button = ttk.Button(
             actions,
@@ -113,6 +133,7 @@ class ChatUI(AsyncToolFrame):
             command=self._send_message,
         )
         self.send_button.grid(row=0, column=1)
+        self.add_tooltip(self.send_button, "Send your message to the selected Ollama model.")
 
     def _handle_ctrl_enter(self, _event: tk.Event) -> str:
         """Send the message from the keyboard shortcut."""
@@ -159,7 +180,7 @@ class ChatUI(AsyncToolFrame):
 
         label_map = {
             "user": ("You", "user_label"),
-            "assistant": ("Sahayak AI", "assistant_label"),
+            "assistant": ("OSS", "assistant_label"),
             "system": ("Status", "system_label"),
         }
         label, tag = label_map[role]

@@ -38,59 +38,88 @@ class EmailUI(AsyncToolFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        ttk.Label(self, text="Email Helper", style="Header.TLabel").grid(
+        header = ttk.Label(self, text="Email Helper", style="Header.TLabel")
+        header.grid(
             row=0, column=0, columnspan=2, sticky="w"
         )
-        ttk.Label(
+        self.add_tooltip(header, "Draft a professional email with your local model.")
+
+        subtitle = ttk.Label(
             self,
             text="Generate a professional email draft from a few details.",
             style="Body.TLabel",
-        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 18))
+        )
+        subtitle.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 18))
+        self.add_tooltip(
+            subtitle,
+            "Use your saved profile plus the form fields below to generate a polished email draft.",
+        )
 
-        ttk.Label(self, text="Recipient Title", style="FieldLabel.TLabel").grid(
+        title_label = ttk.Label(self, text="Recipient Title", style="FieldLabel.TLabel")
+        title_label.grid(
             row=2, column=0, sticky="w"
         )
-        ttk.Label(self, text="Recipient Name", style="FieldLabel.TLabel").grid(
+        self.add_tooltip(title_label, "Choose the recipient title for the email.")
+
+        name_label = ttk.Label(self, text="Recipient Name", style="FieldLabel.TLabel")
+        name_label.grid(
             row=2, column=1, sticky="w", padx=(12, 0)
         )
+        self.add_tooltip(name_label, "Enter the recipient name.")
 
-        ttk.Combobox(
+        title_combo = ttk.Combobox(
             self,
             textvariable=self.title_var,
             values=TITLES,
             state="readonly",
             width=12,
-        ).grid(row=3, column=0, sticky="w", pady=(8, 16))
+        )
+        title_combo.grid(row=3, column=0, sticky="w", pady=(8, 16))
+        self.add_tooltip(title_combo, "Select how the recipient should be addressed.")
 
-        ttk.Entry(
+        name_entry = ttk.Entry(
             self,
             textvariable=self.name_var,
             font=("Segoe UI", 10),
-        ).grid(row=3, column=1, sticky="ew", padx=(12, 0), pady=(8, 16))
+        )
+        name_entry.grid(row=3, column=1, sticky="ew", padx=(12, 0), pady=(8, 16))
+        self.add_tooltip(name_entry, "Recipient name used in the generated email.")
 
-        ttk.Label(self, text="Subject", style="FieldLabel.TLabel").grid(
+        subject_label = ttk.Label(self, text="Subject", style="FieldLabel.TLabel")
+        subject_label.grid(
             row=4, column=0, columnspan=2, sticky="w"
         )
-        ttk.Entry(
+        self.add_tooltip(subject_label, "Subject line for the email draft.")
+
+        subject_entry = ttk.Entry(
             self,
             textvariable=self.subject_var,
             font=("Segoe UI", 10),
-        ).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(8, 16))
+        )
+        subject_entry.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(8, 16))
+        self.add_tooltip(subject_entry, "Enter the email subject.")
 
-        ttk.Label(self, text="Response Length", style="FieldLabel.TLabel").grid(
+        length_label = ttk.Label(self, text="Response Length", style="FieldLabel.TLabel")
+        length_label.grid(
             row=6, column=0, columnspan=2, sticky="w"
         )
-        ttk.Combobox(
+        self.add_tooltip(length_label, "Choose how short or detailed the email should be.")
+
+        length_combo = ttk.Combobox(
             self,
             textvariable=self.response_length_var,
             values=RESPONSE_LENGTHS,
             state="readonly",
             width=24,
-        ).grid(row=7, column=0, columnspan=2, sticky="w", pady=(8, 16))
+        )
+        length_combo.grid(row=7, column=0, columnspan=2, sticky="w", pady=(8, 16))
+        self.add_tooltip(length_combo, "Select short, mid, or long email response length.")
 
-        ttk.Label(self, text="Content / Purpose", style="FieldLabel.TLabel").grid(
+        details_label = ttk.Label(self, text="Content / Purpose", style="FieldLabel.TLabel")
+        details_label.grid(
             row=8, column=0, columnspan=2, sticky="w"
         )
+        self.add_tooltip(details_label, "Describe what the email should say and why it is being written.")
         self.details_box = ScrolledText(
             self,
             height=8,
@@ -104,6 +133,10 @@ class EmailUI(AsyncToolFrame):
         self.details_box.grid(
             row=9, column=0, columnspan=2, sticky="nsew", pady=(8, 6)
         )
+        self.add_tooltip(
+            self.details_box,
+            "Enter the context, purpose, and any important details for the email draft.",
+        )
 
         detail_actions = ttk.Frame(self, style="Panel.TFrame")
         detail_actions.grid(row=10, column=0, columnspan=2, sticky="e", pady=(0, 12))
@@ -115,6 +148,7 @@ class EmailUI(AsyncToolFrame):
             command=self._clear_form,
         )
         self.clear_button.grid(row=0, column=0)
+        self.add_tooltip(self.clear_button, "Clear all email form fields and reset the defaults.")
 
         actions = ttk.Frame(self, style="Panel.TFrame")
         actions.grid(row=11, column=0, columnspan=2, sticky="e", pady=(0, 16))
@@ -129,6 +163,7 @@ class EmailUI(AsyncToolFrame):
             ),
         )
         self.stop_button.grid(row=0, column=0, padx=(0, 8))
+        self.add_tooltip(self.stop_button, "Stop the active email generation request.")
 
         self.generate_button = ttk.Button(
             actions,
@@ -137,17 +172,22 @@ class EmailUI(AsyncToolFrame):
             command=self._generate_email,
         )
         self.generate_button.grid(row=0, column=1, padx=(0, 8))
+        self.add_tooltip(self.generate_button, "Generate a professional email from the current form.")
 
-        ttk.Button(
+        copy_button = ttk.Button(
             actions,
             text="Copy Text",
             style="Secondary.TButton",
             command=self._copy_output,
-        ).grid(row=0, column=2)
+        )
+        copy_button.grid(row=0, column=2)
+        self.add_tooltip(copy_button, "Copy the generated email to your clipboard.")
 
-        ttk.Label(self, text="Output", style="FieldLabel.TLabel").grid(
+        output_label = ttk.Label(self, text="Output", style="FieldLabel.TLabel")
+        output_label.grid(
             row=12, column=0, columnspan=2, sticky="w"
         )
+        self.add_tooltip(output_label, "Generated email draft.")
         self.output_box = ScrolledText(
             self,
             height=10,
@@ -160,6 +200,10 @@ class EmailUI(AsyncToolFrame):
         )
         self.output_box.grid(
             row=13, column=0, columnspan=2, sticky="nsew", pady=(8, 0)
+        )
+        self.add_tooltip(
+            self.output_box,
+            "Editable email draft. You can tweak the final wording before sending it.",
         )
 
     def _generate_email(self) -> None:

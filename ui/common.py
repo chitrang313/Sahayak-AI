@@ -74,6 +74,75 @@ def set_text_content(widget: tk.Text, value: str) -> None:
         widget.configure(state="disabled")
 
 
+class ToolTip:
+    """Small hover tooltip for Tkinter widgets."""
+
+    def __init__(self, widget: tk.Widget, text: str, delay_ms: int = 350) -> None:
+        self.widget = widget
+        self.text = text.strip()
+        self.delay_ms = delay_ms
+        self.tip_window: tk.Toplevel | None = None
+        self._after_id: str | None = None
+
+        if not self.text:
+            return
+
+        self.widget.bind("<Enter>", self._schedule_show, add="+")
+        self.widget.bind("<Leave>", self._hide, add="+")
+        self.widget.bind("<ButtonPress>", self._hide, add="+")
+        self.widget.bind("<FocusOut>", self._hide, add="+")
+
+    def _schedule_show(self, _event: tk.Event | None = None) -> None:
+        self._cancel_scheduled_show()
+        self._after_id = self.widget.after(self.delay_ms, self._show)
+
+    def _cancel_scheduled_show(self) -> None:
+        if self._after_id is not None:
+            self.widget.after_cancel(self._after_id)
+            self._after_id = None
+
+    def _show(self) -> None:
+        self._after_id = None
+        if self.tip_window is not None:
+            return
+
+        x = self.widget.winfo_rootx() + 18
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 8
+
+        self.tip_window = tk.Toplevel(self.widget)
+        self.tip_window.wm_overrideredirect(True)
+        self.tip_window.wm_geometry(f"+{x}+{y}")
+        self.tip_window.configure(bg="#102a43")
+
+        label = tk.Label(
+            self.tip_window,
+            text=self.text,
+            bg="#102a43",
+            fg="#f8fafc",
+            justify="left",
+            wraplength=320,
+            padx=10,
+            pady=8,
+            font=("Segoe UI", 9),
+            relief="solid",
+            bd=1,
+        )
+        label.pack()
+
+    def _hide(self, _event: tk.Event | None = None) -> None:
+        self._cancel_scheduled_show()
+        if self.tip_window is not None:
+            self.tip_window.destroy()
+            self.tip_window = None
+
+
+def add_tooltip(widget: tk.Widget, text: str) -> None:
+    """Attach a tooltip to a widget."""
+    if not text.strip():
+        return
+    setattr(widget, "_sahayak_tooltip", ToolTip(widget, text))
+
+
 class AsyncToolFrame(ttk.Frame):
     """Base frame that runs Ollama requests on a worker thread."""
 
@@ -185,3 +254,7 @@ class AsyncToolFrame(ttk.Frame):
 
     def on_request_error(self, fallback_message: str) -> None:
         """Allow child panels to surface a fallback UI message."""
+
+    def add_tooltip(self, widget: tk.Widget, text: str) -> None:
+        """Attach a tooltip to a child widget."""
+        add_tooltip(widget, text)
