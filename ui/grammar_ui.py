@@ -30,18 +30,28 @@ class GrammarUI(AsyncToolFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        ttk.Label(self, text="Grammar Fix", style="Header.TLabel").grid(
+        header = ttk.Label(self, text="Grammar Fix", style="Header.TLabel")
+        header.grid(
             row=0, column=0, sticky="w"
         )
-        ttk.Label(
+        self.add_tooltip(header, "Clean up spelling, grammar, punctuation, and light phrasing.")
+
+        subtitle = ttk.Label(
             self,
             text="Correct spelling and grammar using your local model.",
             style="Body.TLabel",
-        ).grid(row=1, column=0, sticky="w", pady=(6, 18))
+        )
+        subtitle.grid(row=1, column=0, sticky="w", pady=(6, 18))
+        self.add_tooltip(
+            subtitle,
+            "Paste rough text here and Sahayak AI will return a cleaner version using your local model.",
+        )
 
-        ttk.Label(self, text="Input Text", style="FieldLabel.TLabel").grid(
+        input_label = ttk.Label(self, text="Input Text", style="FieldLabel.TLabel")
+        input_label.grid(
             row=2, column=0, sticky="w"
         )
+        self.add_tooltip(input_label, "Enter the text you want to correct.")
 
         self.input_box = ScrolledText(
             self,
@@ -54,6 +64,10 @@ class GrammarUI(AsyncToolFrame):
             pady=12,
         )
         self.input_box.grid(row=3, column=0, sticky="nsew", pady=(8, 6))
+        self.add_tooltip(
+            self.input_box,
+            "Editable input area for the text that needs grammar and spelling correction.",
+        )
 
         input_actions = ttk.Frame(self, style="Panel.TFrame")
         input_actions.grid(row=4, column=0, sticky="e", pady=(0, 12))
@@ -65,6 +79,7 @@ class GrammarUI(AsyncToolFrame):
             command=self._clear_input,
         )
         self.clear_button.grid(row=0, column=0)
+        self.add_tooltip(self.clear_button, "Clear the current input text.")
 
         controls = ttk.Frame(self, style="Panel.TFrame")
         controls.grid(row=5, column=0, sticky="e", pady=(0, 16))
@@ -79,6 +94,7 @@ class GrammarUI(AsyncToolFrame):
             ),
         )
         self.stop_button.grid(row=0, column=0, padx=(0, 8))
+        self.add_tooltip(self.stop_button, "Stop the active grammar correction request.")
 
         self.correct_button = ttk.Button(
             controls,
@@ -87,6 +103,7 @@ class GrammarUI(AsyncToolFrame):
             command=self._correct_text,
         )
         self.correct_button.grid(row=0, column=1, padx=(0, 8))
+        self.add_tooltip(self.correct_button, "Send the input text for correction.")
 
         self.copy_button = ttk.Button(
             controls,
@@ -95,10 +112,13 @@ class GrammarUI(AsyncToolFrame):
             command=self._copy_output,
         )
         self.copy_button.grid(row=0, column=2)
+        self.add_tooltip(self.copy_button, "Copy the corrected output to your clipboard.")
 
-        ttk.Label(self, text="Output", style="FieldLabel.TLabel").grid(
+        output_label = ttk.Label(self, text="Output", style="FieldLabel.TLabel")
+        output_label.grid(
             row=6, column=0, sticky="w"
         )
+        self.add_tooltip(output_label, "Corrected result from the model.")
 
         self.output_box = ScrolledText(
             self,
@@ -111,6 +131,10 @@ class GrammarUI(AsyncToolFrame):
             pady=12,
         )
         self.output_box.grid(row=7, column=0, sticky="nsew", pady=(8, 0))
+        self.add_tooltip(
+            self.output_box,
+            "Editable corrected output. You can fine-tune the result before copying it.",
+        )
 
     def _correct_text(self) -> None:
         if self.input_box is None:

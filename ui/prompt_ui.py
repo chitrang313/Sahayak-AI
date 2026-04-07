@@ -49,46 +49,65 @@ class PromptUI(AsyncToolFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        ttk.Label(self, text="Prompt Creator", style="Header.TLabel").grid(
+        header = ttk.Label(self, text="Prompt Creator", style="Header.TLabel")
+        header.grid(
             row=0, column=0, sticky="w"
         )
-        ttk.Label(
+        self.add_tooltip(header, "Generate a stronger, category-specific prompt or response outline.")
+
+        subtitle = ttk.Label(
             self,
             text="Turn a rough idea into a more detailed AI prompt.",
             style="Body.TLabel",
-        ).grid(row=1, column=0, sticky="w", pady=(6, 18))
+        )
+        subtitle.grid(row=1, column=0, sticky="w", pady=(6, 18))
+        self.add_tooltip(
+            subtitle,
+            "Use the selected category and response length to shape a more precise professional result.",
+        )
 
         controls = ttk.Frame(self, style="Panel.TFrame")
         controls.grid(row=2, column=0, sticky="w", pady=(0, 16))
 
-        ttk.Label(controls, text="Category", style="FieldLabel.TLabel").grid(
+        category_label = ttk.Label(controls, text="Category", style="FieldLabel.TLabel")
+        category_label.grid(
             row=0, column=0, sticky="w"
         )
-        ttk.Label(
+        self.add_tooltip(category_label, "Choose the expert role that should shape the output.")
+
+        length_label = ttk.Label(
             controls,
             text="Response Length",
             style="FieldLabel.TLabel",
-        ).grid(row=0, column=1, sticky="w", padx=(16, 0))
+        )
+        length_label.grid(row=0, column=1, sticky="w", padx=(16, 0))
+        self.add_tooltip(length_label, "Choose how concise or detailed the result should be.")
 
-        ttk.Combobox(
+        category_combo = ttk.Combobox(
             controls,
             textvariable=self.category_var,
             values=CATEGORIES,
             state="readonly",
             width=20,
-        ).grid(row=1, column=0, sticky="w", pady=(8, 0))
+        )
+        category_combo.grid(row=1, column=0, sticky="w", pady=(8, 0))
+        self.add_tooltip(category_combo, "Selected professional category for the response.")
 
-        ttk.Combobox(
+        length_combo = ttk.Combobox(
             controls,
             textvariable=self.response_length_var,
             values=RESPONSE_LENGTHS,
             state="readonly",
             width=24,
-        ).grid(row=1, column=1, sticky="w", padx=(16, 0), pady=(8, 0))
+        )
+        length_combo.grid(row=1, column=1, sticky="w", padx=(16, 0), pady=(8, 0))
+        self.add_tooltip(length_combo, "Selected response length guidance for the output.")
 
-        ttk.Label(self, text="User Idea", style="FieldLabel.TLabel").grid(
+        idea_label = ttk.Label(self, text="User Idea", style="FieldLabel.TLabel")
+        idea_label.grid(
             row=3, column=0, sticky="w"
         )
+        self.add_tooltip(idea_label, "Describe the request or rough idea you want refined.")
         self.idea_box = ScrolledText(
             self,
             height=8,
@@ -100,6 +119,10 @@ class PromptUI(AsyncToolFrame):
             pady=12,
         )
         self.idea_box.grid(row=4, column=0, sticky="nsew", pady=(8, 6))
+        self.add_tooltip(
+            self.idea_box,
+            "Enter the user request, goal, or rough prompt you want to improve.",
+        )
 
         input_actions = ttk.Frame(self, style="Panel.TFrame")
         input_actions.grid(row=5, column=0, sticky="e", pady=(0, 12))
@@ -111,6 +134,7 @@ class PromptUI(AsyncToolFrame):
             command=self._clear_input,
         )
         self.clear_button.grid(row=0, column=0)
+        self.add_tooltip(self.clear_button, "Clear the current idea input.")
 
         actions = ttk.Frame(self, style="Panel.TFrame")
         actions.grid(row=6, column=0, sticky="e", pady=(0, 16))
@@ -125,6 +149,7 @@ class PromptUI(AsyncToolFrame):
             ),
         )
         self.stop_button.grid(row=0, column=0, padx=(0, 8))
+        self.add_tooltip(self.stop_button, "Stop the active prompt creation request.")
 
         self.generate_button = ttk.Button(
             actions,
@@ -133,17 +158,22 @@ class PromptUI(AsyncToolFrame):
             command=self._generate_prompt,
         )
         self.generate_button.grid(row=0, column=1, padx=(0, 8))
+        self.add_tooltip(self.generate_button, "Generate the structured category-specific result.")
 
-        ttk.Button(
+        copy_button = ttk.Button(
             actions,
             text="Copy Text",
             style="Secondary.TButton",
             command=self._copy_output,
-        ).grid(row=0, column=2)
+        )
+        copy_button.grid(row=0, column=2)
+        self.add_tooltip(copy_button, "Copy the generated output to your clipboard.")
 
-        ttk.Label(self, text="Output", style="FieldLabel.TLabel").grid(
+        output_label = ttk.Label(self, text="Output", style="FieldLabel.TLabel")
+        output_label.grid(
             row=7, column=0, sticky="w"
         )
+        self.add_tooltip(output_label, "Generated result from the selected category and input.")
         self.output_box = ScrolledText(
             self,
             height=10,
@@ -155,6 +185,10 @@ class PromptUI(AsyncToolFrame):
             pady=12,
         )
         self.output_box.grid(row=8, column=0, sticky="nsew", pady=(8, 0))
+        self.add_tooltip(
+            self.output_box,
+            "Editable generated output so you can refine it before reuse.",
+        )
 
     def _generate_prompt(self) -> None:
         if self.idea_box is None:

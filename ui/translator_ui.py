@@ -44,18 +44,28 @@ class TranslatorUI(AsyncToolFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        ttk.Label(self, text="Translator", style="Header.TLabel").grid(
+        header = ttk.Label(self, text="Translator", style="Header.TLabel")
+        header.grid(
             row=0, column=0, sticky="w"
         )
-        ttk.Label(
+        self.add_tooltip(header, "Translate text between two supported languages.")
+
+        subtitle = ttk.Label(
             self,
             text="Translate text between supported languages.",
             style="Body.TLabel",
-        ).grid(row=1, column=0, sticky="w", pady=(6, 18))
+        )
+        subtitle.grid(row=1, column=0, sticky="w", pady=(6, 18))
+        self.add_tooltip(
+            subtitle,
+            "The translator uses a stronger native-style translation prompt for more natural output.",
+        )
 
-        ttk.Label(self, text="Input Text", style="FieldLabel.TLabel").grid(
+        input_label = ttk.Label(self, text="Input Text", style="FieldLabel.TLabel")
+        input_label.grid(
             row=2, column=0, sticky="w"
         )
+        self.add_tooltip(input_label, "Enter the text you want to translate.")
 
         self.input_box = ScrolledText(
             self,
@@ -68,6 +78,10 @@ class TranslatorUI(AsyncToolFrame):
             pady=12,
         )
         self.input_box.grid(row=3, column=0, sticky="nsew", pady=(8, 6))
+        self.add_tooltip(
+            self.input_box,
+            "Editable source text for translation.",
+        )
 
         input_actions = ttk.Frame(self, style="Panel.TFrame")
         input_actions.grid(row=4, column=0, sticky="e", pady=(0, 12))
@@ -79,33 +93,43 @@ class TranslatorUI(AsyncToolFrame):
             command=self._clear_input,
         )
         self.clear_button.grid(row=0, column=0)
+        self.add_tooltip(self.clear_button, "Clear the source text box.")
 
         controls = ttk.Frame(self, style="Panel.TFrame")
         controls.grid(row=5, column=0, sticky="ew", pady=(0, 16))
         controls.grid_columnconfigure(2, weight=1)
 
-        ttk.Label(controls, text="From", style="FieldLabel.TLabel").grid(
+        from_label = ttk.Label(controls, text="From", style="FieldLabel.TLabel")
+        from_label.grid(
             row=0, column=0, sticky="w"
         )
-        ttk.Label(controls, text="To", style="FieldLabel.TLabel").grid(
+        self.add_tooltip(from_label, "Select the source language.")
+
+        to_label = ttk.Label(controls, text="To", style="FieldLabel.TLabel")
+        to_label.grid(
             row=0, column=1, sticky="w", padx=(12, 0)
         )
+        self.add_tooltip(to_label, "Select the target language.")
 
-        ttk.Combobox(
+        from_combo = ttk.Combobox(
             controls,
             textvariable=self.from_language,
             values=LANGUAGES,
             state="readonly",
             width=16,
-        ).grid(row=1, column=0, sticky="w", pady=(8, 0))
+        )
+        from_combo.grid(row=1, column=0, sticky="w", pady=(8, 0))
+        self.add_tooltip(from_combo, "Current source language for the translation.")
 
-        ttk.Combobox(
+        to_combo = ttk.Combobox(
             controls,
             textvariable=self.to_language,
             values=LANGUAGES,
             state="readonly",
             width=16,
-        ).grid(row=1, column=1, sticky="w", padx=(12, 0), pady=(8, 0))
+        )
+        to_combo.grid(row=1, column=1, sticky="w", padx=(12, 0), pady=(8, 0))
+        self.add_tooltip(to_combo, "Current target language for the translation.")
 
         button_wrap = ttk.Frame(controls, style="Panel.TFrame")
         button_wrap.grid(row=1, column=2, sticky="e", pady=(8, 0))
@@ -120,6 +144,7 @@ class TranslatorUI(AsyncToolFrame):
             ),
         )
         self.stop_button.grid(row=0, column=0, padx=(0, 8))
+        self.add_tooltip(self.stop_button, "Stop the active translation request.")
 
         self.translate_button = ttk.Button(
             button_wrap,
@@ -128,6 +153,7 @@ class TranslatorUI(AsyncToolFrame):
             command=self._translate_text,
         )
         self.translate_button.grid(row=0, column=1, padx=(0, 8))
+        self.add_tooltip(self.translate_button, "Translate the source text into the selected target language.")
 
         self.copy_button = ttk.Button(
             button_wrap,
@@ -136,10 +162,13 @@ class TranslatorUI(AsyncToolFrame):
             command=self._copy_output,
         )
         self.copy_button.grid(row=0, column=2)
+        self.add_tooltip(self.copy_button, "Copy the translated output to your clipboard.")
 
-        ttk.Label(self, text="Output", style="FieldLabel.TLabel").grid(
+        output_label = ttk.Label(self, text="Output", style="FieldLabel.TLabel")
+        output_label.grid(
             row=6, column=0, sticky="w"
         )
+        self.add_tooltip(output_label, "Translated result from the model.")
 
         self.output_box = ScrolledText(
             self,
@@ -152,6 +181,10 @@ class TranslatorUI(AsyncToolFrame):
             pady=12,
         )
         self.output_box.grid(row=7, column=0, sticky="nsew", pady=(8, 0))
+        self.add_tooltip(
+            self.output_box,
+            "Editable translated output so you can adjust wording before using it.",
+        )
 
     def _translate_text(self) -> None:
         if self.input_box is None:
