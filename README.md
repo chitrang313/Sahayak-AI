@@ -7,6 +7,7 @@ Sahayak AI is a desktop productivity assistant built with Python, Tkinter, and O
 ## What It Includes
 
 - Chat with a local Ollama model
+- Developer assistant workspace for code explanation, debugging, refactoring, boilerplate generation, API explanation, pre-commit review, security analysis, and performance review
 - Grammar and spelling correction
 - Translator with source and target language selection
 - Professional email drafting helper
@@ -128,6 +129,14 @@ Profile data is stored locally in `user_profile.json`, which is ignored by git a
 - Assistant replies are shown under `Sahayak say:`
 - Use `Stop` to cancel the running request
 
+### Developer Assistant
+
+- Open `Developer Assistant` from the left navigation
+- Choose a developer mode such as `Code Understanding`, `Debugging Errors`, or `Security Analysis`
+- Use the text area for code, errors, requirements, or JSON when the selected mode needs text input
+- Use the file or folder picker when the selected mode needs a file, directory, or repository path
+- Copy or edit the structured output after generation
+
 ### Grammar Fix
 
 - Paste or type text into the input box
@@ -179,6 +188,7 @@ Sahayak-AI/
 |-- ui/
 |   |-- layout.py
 |   |-- chat_ui.py
+|   |-- developer_ui.py
 |   |-- grammar_ui.py
 |   |-- translator_ui.py
 |   |-- email_ui.py
@@ -187,6 +197,7 @@ Sahayak-AI/
 |-- utils/
 |   |-- status_checker.py
 |   |-- clipboard.py
+|   |-- developer_context.py
 |   `-- profile_store.py
 `-- assets/
     `-- screenshots/

@@ -15,6 +15,39 @@ RESPONSE_LENGTH_GUIDANCE = {
     ),
 }
 
+DEVELOPER_MODE_OPTIONS = [
+    ("code_explain", "Code Understanding"),
+    ("debug", "Debugging Errors"),
+    ("refactor", "Code Refactoring"),
+    ("boilerplate", "Boilerplate Code Generation"),
+    ("api_explain", "API Understanding"),
+    ("precommit", "Pre-Commit Code Validation"),
+    ("security", "Security Analysis"),
+    ("performance", "Performance Optimization"),
+]
+
+BOILERPLATE_LANGUAGES = [
+    "C#",
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Java",
+    "Go",
+    "C++",
+    "PHP",
+]
+
+LANGUAGE_FENCE_TAGS = {
+    "C#": "csharp",
+    "Python": "python",
+    "JavaScript": "javascript",
+    "TypeScript": "typescript",
+    "Java": "java",
+    "Go": "go",
+    "C++": "cpp",
+    "PHP": "php",
+}
+
 
 def build_chat_prompt(history: list[dict[str, str]]) -> str:
     """Build a conversational prompt from prior messages."""
@@ -33,6 +66,266 @@ def build_chat_prompt(history: list[dict[str, str]]) -> str:
 
     lines.append("Assistant:")
     return "\n".join(lines)
+
+
+def build_developer_prompt(
+    mode: str,
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build one of the structured developer-assistant prompts."""
+    builders = {
+        "code_explain": _build_code_explain_prompt,
+        "debug": _build_debug_prompt,
+        "refactor": _build_refactor_prompt,
+        "boilerplate": _build_boilerplate_prompt,
+        "api_explain": _build_api_explain_prompt,
+        "precommit": _build_precommit_prompt,
+        "security": _build_security_prompt,
+        "performance": _build_performance_prompt,
+    }
+
+    try:
+        builder = builders[mode]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported developer mode: {mode}") from exc
+
+    return builder(prepared_input, language=language)
+
+
+def _developer_prompt_prefix() -> str:
+    """Shared rules for developer-focused prompts."""
+    return (
+        "Role: Senior developer.\n"
+        "Strict rules:\n"
+        "- Use only the provided input.\n"
+        "- Do not hallucinate missing files, runtime behavior, APIs, or test results.\n"
+        "- If the input is incomplete or truncated, mention that briefly instead of guessing.\n"
+        "- Keep the output structured, practical, and directly useful.\n\n"
+    )
+
+
+def _developer_prompt_suffix() -> str:
+    """Shared ending for developer-focused prompts."""
+    return "Return ONLY the requested format. Do not add extra explanation."
+
+
+def _build_code_explain_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the code understanding prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Explain the provided file or directory context. Focus on the purpose, flow, "
+        "main components, and practical risks that are clearly supported by the input.\n\n"
+        "Output Format:\n"
+        "Purpose\n"
+        "- One or more bullets describing what the code is for.\n"
+        "Flow\n"
+        "- Step-by-step bullets describing how the logic moves.\n"
+        "Components\n"
+        "- Component or file name: responsibility.\n"
+        "Risks\n"
+        "- Concrete risks, assumptions, or weak spots.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_debug_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the debugging prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Analyze the error text. Explain the likely root cause in simple language, say "
+        "where the user should look first, and suggest the most direct fix. If the error "
+        "text is not enough to know the exact cause, say the most likely cause and note "
+        "what detail is missing.\n\n"
+        "Output Format:\n"
+        "Root Cause\n"
+        "- Clear and simple explanation.\n"
+        "Why It Happened\n"
+        "- Short bullets describing the chain of events.\n"
+        "Where To Check First\n"
+        "- The first file, config, log, or code area to inspect.\n"
+        "Fix\n"
+        "- Direct steps to resolve it.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_refactor_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the code refactoring prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Review the provided code, identify design or readability issues, and refactor it "
+        "without changing the behavior. Keep the same language and preserve functionality.\n\n"
+        "Output Format:\n"
+        "Issues\n"
+        "- Problems or weaknesses in the original code.\n"
+        "Refactored Code\n"
+        "```text\n"
+        "Provide only the improved code here.\n"
+        "```\n"
+        "Improvements\n"
+        "- Short bullets describing what got better.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_boilerplate_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the boilerplate generation prompt."""
+    selected_language = language or "Python"
+    code_fence = LANGUAGE_FENCE_TAGS.get(selected_language, "text")
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        f"Generate optimized, production-ready boilerplate code in {selected_language}. "
+        "Respect the selected language, include the full working code, and keep the "
+        "implementation practical for real development.\n\n"
+        "Output Format:\n"
+        "Full Working Code\n"
+        f"```{code_fence}\n"
+        "Provide the complete implementation here.\n"
+        "```\n"
+        "Short Explanation\n"
+        "- Brief bullets describing the main parts.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_api_explain_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the API understanding prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Explain the JSON structure clearly. Show the hierarchy in a tree-like layout, "
+        "describe important fields in simple language, and give a short summary of what "
+        "this payload represents.\n\n"
+        "Output Format:\n"
+        "Hierarchy\n"
+        "- Use tree-style plain text to show nesting.\n"
+        "Field Explanation\n"
+        "- field.path: simple explanation.\n"
+        "Short Summary\n"
+        "- Concise summary bullets.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_precommit_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the pre-commit review prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Act as a strict code reviewer for the provided git changes. Focus on bugs, "
+        "logic problems, regression risk, weak validation, unsafe assumptions, and poor "
+        "maintainability. Do not praise the code. Only report findings supported by the input.\n\n"
+        "Output Format:\n"
+        "Critical Issues\n"
+        "- High-impact bugs or release blockers. Use '- None found.' if none exist.\n"
+        "Logic Issues\n"
+        "- Incorrect behavior, edge cases, or missing checks. Use '- None found.' if none exist.\n"
+        "Code Smells\n"
+        "- Maintainability or readability issues. Use '- None found.' if none exist.\n"
+        "Suggestions\n"
+        "- Practical next steps.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_security_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the security analysis prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Review the provided repository diff and file contents for security issues. Look "
+        "for secrets, tokens, unsafe auth flows, injection risk, insecure storage, weak "
+        "input handling, and clearly supported vulnerabilities.\n\n"
+        "Output Format:\n"
+        "Vulnerabilities\n"
+        "- One bullet per issue. Use '- None found.' if no clear issue is supported.\n"
+        "Severity\n"
+        "- Map each issue to High, Medium, or Low with a short reason.\n"
+        "Fix Suggestions\n"
+        "- Direct mitigation steps.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
+
+
+def _build_performance_prompt(
+    prepared_input: str,
+    *,
+    language: str | None = None,
+) -> str:
+    """Build the performance optimization prompt."""
+    del language
+    return (
+        f"{_developer_prompt_prefix()}"
+        "Task:\n"
+        "Analyze the provided code for performance bottlenecks. Suggest an optimized "
+        "version that keeps the same behavior, and explain the likely impact of the changes.\n\n"
+        "Output Format:\n"
+        "Issues\n"
+        "- Performance bottlenecks or wasteful patterns.\n"
+        "Optimized Version\n"
+        "```text\n"
+        "Provide only the optimized code here.\n"
+        "```\n"
+        "Impact\n"
+        "- Practical effect of the improvements.\n\n"
+        "Input:\n"
+        f"{prepared_input}\n\n"
+        f"{_developer_prompt_suffix()}"
+    )
 
 
 def build_grammar_prompt(user_input: str) -> str:

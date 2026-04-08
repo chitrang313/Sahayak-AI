@@ -163,6 +163,7 @@ class AsyncToolFrame(ttk.Frame):
         *,
         error_title: str,
         fallback_message: str,
+        timeout: int | None = None,
     ) -> None:
         """Execute a prompt against Ollama without freezing the UI."""
         if self.is_running:
@@ -175,10 +176,16 @@ class AsyncToolFrame(ttk.Frame):
 
         def worker() -> None:
             try:
+                request_kwargs = {
+                    "model_name": selected_model,
+                    "cancel_token": token,
+                }
+                if timeout is not None:
+                    request_kwargs["timeout"] = timeout
+
                 response_text, model_name = self.controller.ollama_service.generate(
                     prompt,
-                    model_name=selected_model,
-                    cancel_token=token,
+                    **request_kwargs,
                 )
             except OllamaCancelledError:
                 return

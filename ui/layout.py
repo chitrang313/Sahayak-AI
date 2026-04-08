@@ -10,6 +10,7 @@ from tkinter.scrolledtext import ScrolledText
 from services.ollama_service import DEFAULT_MODEL, OllamaService
 from ui.chat_ui import ChatUI
 from ui.common import add_tooltip
+from ui.developer_ui import DeveloperAssistantUI
 from ui.email_ui import EmailUI
 from ui.grammar_ui import GrammarUI
 from ui.prompt_ui import PromptUI
@@ -18,18 +19,21 @@ from utils.profile_store import load_profile, save_profile
 from utils.status_checker import is_ollama_running
 
 
+APP_DISPLAY_NAME = "AI Developer Assistant (Extended)"
+
 NAV_ITEMS = [
     ("Chat", ChatUI),
+    ("Developer Assistant", DeveloperAssistantUI),
     ("Grammar Fix", GrammarUI),
     ("Translator", TranslatorUI),
     ("Email Helper", EmailUI),
     ("Prompt Creator", PromptUI),
 ]
 
-HOW_TO_USE_TEXT = """How To Use Sahayak AI
+HOW_TO_USE_TEXT = f"""How To Use {APP_DISPLAY_NAME}
 
 1. Start Ollama on your computer.
-2. Open Sahayak AI and check the bottom-left status dot.
+2. Open the app and check the bottom-left status dot.
 3. Pick an installed model from the bottom-right dropdown.
 4. Use the left navigation to switch tools.
 
@@ -39,6 +43,12 @@ Chat
 - Type your message and click Send.
 - Press Ctrl+Enter to send faster.
 - Click Stop to cancel a running response.
+
+Developer Assistant
+- Choose a developer mode such as code explanation, debug, refactor, or security scan.
+- Use the text box for code, JSON, errors, or requirements.
+- Use the path picker for file, folder, or repository-based analysis.
+- Copy or edit the structured output after generation.
 
 Grammar Fix
 - Paste your text into the input box and click Correct.
@@ -104,6 +114,7 @@ Easy Ways To Open The App
 
 NAV_TOOLTIPS = {
     "Chat": "Chat with your local Ollama model and keep the conversation history in one place.",
+    "Developer Assistant": "Analyze code, debug errors, refactor, review diffs, and run developer-focused prompts.",
     "Grammar Fix": "Fix spelling, grammar, punctuation, and small clarity issues in your text.",
     "Translator": "Translate text between supported languages with your selected local model.",
     "Email Helper": "Generate a polished email draft from a few quick inputs.",
@@ -116,7 +127,7 @@ class SahayakAIApp:
 
     def __init__(self) -> None:
         self.root = tk.Tk()
-        self.root.title("Sahayak AI")
+        self.root.title(APP_DISPLAY_NAME)
         self.root.geometry("1320x840")
         self.root.minsize(1120, 720)
         self.root.configure(bg="#eef2f6")
@@ -278,9 +289,12 @@ class SahayakAIApp:
         menu_button.grid(row=0, column=0, sticky="w", padx=(0, 14))
         add_tooltip(menu_button, "Show or hide the left navigation panel.")
 
-        title_label = ttk.Label(top_bar, text="Sahayak AI", style="TopTitle.TLabel")
+        title_label = ttk.Label(top_bar, text=APP_DISPLAY_NAME, style="TopTitle.TLabel")
         title_label.grid(row=0, column=1, sticky="w")
-        add_tooltip(title_label, "Sahayak AI desktop workspace.")
+        add_tooltip(
+            title_label,
+            "Desktop workspace for the extended AI developer assistant.",
+        )
 
         right_cluster = ttk.Frame(top_bar, style="TopBar.TFrame")
         right_cluster.grid(row=0, column=2, sticky="e")
@@ -430,7 +444,7 @@ class SahayakAIApp:
             self.profile_details_frame,
             "Your Full Name",
             self.profile_full_name_var,
-            "Enter the name you want Sahayak AI to use in profile-aware tools.",
+            "Enter the name you want the assistant to use in profile-aware tools.",
         )
         self._build_profile_field(
             self.profile_details_frame,
@@ -710,7 +724,7 @@ class SahayakAIApp:
             return
 
         self.help_window = tk.Toplevel(self.root)
-        self.help_window.title("Sahayak AI Help")
+        self.help_window.title(f"{APP_DISPLAY_NAME} Help")
         self.help_window.geometry("860x620")
         self.help_window.minsize(760, 560)
         self.help_window.configure(bg="#eef2f6")
@@ -725,11 +739,14 @@ class SahayakAIApp:
 
         title_label = ttk.Label(
             header,
-            text="Sahayak AI Help Center",
+            text=f"{APP_DISPLAY_NAME} Help Center",
             style="Header.TLabel",
         )
         title_label.grid(row=0, column=0, sticky="w")
-        add_tooltip(title_label, "Usage tips and setup guidance for Sahayak AI.")
+        add_tooltip(
+            title_label,
+            "Usage tips and setup guidance for the extended developer assistant.",
+        )
 
         close_button = ttk.Button(
             header,
@@ -774,7 +791,7 @@ class SahayakAIApp:
         text_widget.grid(row=0, column=0, sticky="nsew")
         text_widget.insert("1.0", content)
         text_widget.configure(state="disabled")
-        add_tooltip(text_widget, f"{title} guidance for Sahayak AI.")
+        add_tooltip(text_widget, f"{title} guidance for {APP_DISPLAY_NAME}.")
 
     def _close_help_panel(self) -> None:
         """Close the help dialog if it is open."""
